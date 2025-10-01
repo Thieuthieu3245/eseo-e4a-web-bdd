@@ -35,3 +35,27 @@ idCinema INTEGER,
 idFilm INTEGER,
 jour DATE
 );
+
+
+
+# Partie 1
+
+# Première requête
+/*
+Compte le nombre de personne dans la table Personne
+*/
+
+# Deuxième requête
+/*
+Affiche le film le plus ancien
+*/
+
+# Troisième requête
+/*
+Affiche le nombre de films joués par chaque acteur
+*/
+
+
+
+# Partie 2
+
