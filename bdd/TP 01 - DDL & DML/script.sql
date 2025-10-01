@@ -103,7 +103,7 @@ SELECT AVG(recette) FROM film;
 SELECT * FROM film WHERE titre LIKE '%a%';
 
 
-
+# P1
 CREATE SCHEMA Animalerie;
 USE Animalerie;
 
@@ -111,18 +111,121 @@ DROP TABLE IF EXISTS Animaux;
 CREATE TABLE Animaux (
     id_animal INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(50),
-    propriétaire VARCHAR(50),
+    proprietaire VARCHAR(50),
+    espece VARCHAR(50),
     sexe VARCHAR(50),
     naissance DATE,
-    mort DATE NULL
+    mort DATE
 );
 
 LOAD DATA INFILE 'C:/Users/Thieu/Documents/Cours/ESEO2/Semestre 7/BDD/bdd/TP 01 - DDL & DML/Animaux.txt'
 INTO TABLE Animaux
 FIELDS TERMINATED BY ',' 
-LINES TERMINATED BY '\n';
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 0 ROWS
+(@nom, @proprietaire, @espece, @sexe, @date_naissance, @date_mort)
+SET nom = @nom,
+    proprietaire = @proprietaire,
+    espece = @espece,
+    sexe = @sexe,
+    naissance = @date_naissance,
+    mort = @date_mort;
 
-INSERT INTO animaux (nom, propriétaire, sexe, naissance) VALUES ('Jojo', 'Diane', 'F', '1999-03-30');
+INSERT INTO animaux (nom, proprietaire, espece, sexe, naissance) VALUES ('Jojo', 'Diane', 'hamster', 'F', '1999-03-30');
+INSERT INTO animaux (nom, proprietaire, espece, sexe, naissance) VALUES ('Arthur', 'Gilles', 'chien', 'm', '2013-11-30');
 
 
 # P2
+SELECT * FROM animaux;
+SELECT proprietaire FROM animaux;
+SELECT DISTINCT(proprietaire) FROM animaux;
+SELECT * FROM animaux WHERE UPPER(espece) = 'CHIEN' && UPPER(sexe) = 'F';
+SELECT * FROM animaux WHERE UPPER(espece) = 'SERPENT' || UPPER(espece) = 'OISEAU';
+SELECT COUNT(*) AS nb_animaux FROM animaux;
+SELECT espece, COUNT(*) AS nb_animaux FROM animaux GROUP BY espece;
+SELECT sexe, COUNT(*) AS nb_animaux FROM animaux GROUP BY sexe;
+SELECT UPPER(sexe), espece, COUNT(*) AS nb_animaux FROM animaux GROUP BY UPPER(espece), UPPER(sexe);
+
+
+# P3
+SELECT nom, naissance, mort FROM animaux;
+SELECT nom, DATEDIFF(NOW(), naissance)/365 AS age FROM animaux;
+SELECT nom, DATEDIFF(NOW(), naissance)/365 AS age FROM animaux ORDER BY nom ASC, age DESC;
+SELECT nom, DATEDIFF(mort, naissance)/365 AS age FROM animaux WHERE mort IS NOT NULL;
+
+
+
+# P4
+SELECT * FROM animaux WHERE DATE_FORMAT(naissance, '%m') = DATE_FORMAT(NOW(), '%m')+1;
+SELECT * FROM animaux WHERE UPPER(nom) LIKE 'F%';
+SELECT * FROM animaux WHERE UPPER(nom) LIKE '%W%';
+SELECT * FROM animaux WHERE UPPER(nom) LIKE '%FY';
+SELECT * FROM animaux WHERE LENGTH(nom) = 5;
+
+
+# Partie 5
+
+CREATE SCHEMA Echec;
+USE Echec;
+
+DROP TABLE IF EXISTS Tournoi;
+DROP TABLE IF EXISTS Club;
+DROP TABLE IF EXISTS Joueur;
+DROP TABLE IF EXISTS Partie;
+DROP TABLE IF EXISTS Coups;
+CREATE TABLE Tournoi (
+    id_tournoi INT PRIMARY KEY AUTO_INCREMENT,
+    nom VARCHAR(50) NOT NULL,
+    lieu VARCHAR(50),
+    date_debut DATE NOT NULL,
+    date_fin DATE
+)
+
+CREATE TABLE Club (
+    id_club INT PRIMARY KEY AUTO_INCREMENT,
+    nom VARCHAR(50) NOT NULL
+)
+
+CREATE TABLE Joueur (
+    id_joueur INT PRIMARY KEY AUTO_INCREMENT,
+    nom VARCHAR(25) NOT NULL,
+    prenom VARCHAR(25) NOT NULL,
+    elo VARCHAR(25) NOT NULL,
+    id_club INT,
+    FOREIGN KEY (id_club) REFERENCES Club(id_club)
+)
+
+CREATE TABLE Partie (
+    id_partie INT PRIMARY KEY AUTO_INCREMENT,
+    id_tournoi INT,
+    id_joueur1 INT NOT NULL,
+    id_joueur2 INT NOT NULL,
+    date_partie DATETIME,
+    num_round INT,
+    num_table INT,
+    resultat VARCHAR(50),
+    FOREIGN KEY (id_tournoi) REFERENCES Tournoi(id_tournoi),
+    FOREIGN KEY (id_joueur1) REFERENCES Joueur(id_joueur),
+    FOREIGN KEY (id_joueur2) REFERENCES Joueur(id_joueur)
+)
+
+CREATE TABLE Coups(
+    id_coup INT PRIMARY KEY AUTO_INCREMENT,
+    nuemro_coup INT UNSIGNED NOT NULL,
+    id_partie INT NOT NULL,
+    is_black INT DEFAULT false,
+    coup VARCHAR(50) NOT NULL,
+    FOREIGN KEY (id_partie) REFERENCES Partie(id_partie)
+)
+
+CREATE TABLE feuille (
+    id_feuille INT PRIMARY KEY AUTO_INCREMENT,
+    nom VARCHAR(50) NOT NULL,
+    adresse VARCHAR(50),
+    ville VARCHAR(50),
+    code_postal INT,
+    id_partie INT NOT NULL,
+    FOREIGN KEY (id_partie) REFERENCES Partie(id_partie)
+);
+
